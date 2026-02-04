@@ -186,9 +186,21 @@ const getPost = asyncHandler(async (req, res) => {
         new ApiResponse(200, { post }, "Post fetched successfully")
     );
 });
+
+const getPosts = asyncHandler(async (req, res) => {
+  const posts = await Post.find({ status: "active" })
+    .populate("author", "fullName email")
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json(
+    new ApiResponse(200, { posts }, "Posts fetched successfully")
+  );
+});
+
 export {
     createPost,
     updatePost,
     deletePost,
-    getPost
+    getPost,
+    getPosts
 }
