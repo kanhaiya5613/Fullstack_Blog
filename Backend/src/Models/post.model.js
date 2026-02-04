@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 // define post schema with fields: title, content, indexedDBmage, status, author
 // add timestamps to the schema
 // export the Post model
-const posrSchema = new Schema(
+const postSchema = new Schema(
     {
         title: {
             type: String,
@@ -13,9 +13,16 @@ const posrSchema = new Schema(
             type: String,
             required: true
         },
-        indexedDBmage: {
-            type: String, // cloudinary url
-            required: true
+        featuredImage: {
+            url: {
+                type: String, // cloudinary url
+                required: true
+            },
+            publicId: {
+                type: String, // cloudinary public id
+                required: true
+            },
+
         },
         status: {
             type: String,
@@ -31,4 +38,4 @@ const posrSchema = new Schema(
 }
 )
 
-export const Post = mongoose.model("Post", posrSchema);
+export const Post = mongoose.model("Post", postSchema);
