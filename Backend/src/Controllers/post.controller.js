@@ -1,20 +1,21 @@
-import {Post} from "../Models/post.model.js"
+import { Post } from "../Models/post.model.js"
 import { asyncHandler } from "../Utils/AsyncHandler.js"
 import { ApiError } from "../Utils/ApiError.js"
 import { ApiResponse } from "../Utils/ApiResponse.js"
-import {uploadOnCloudinary,deleteFromCloudinary} from "../Utils/Cloudinary.js"
+import { uploadOnCloudinary, deleteFromCloudinary } from "../Utils/Cloudinary.js"
 import { upload } from "../Middlewares/multer.middleware.js"
 
-// Creating Post 
-// steps
-// get the details from req.body and req.file
-// validate the details
-// check if image/video available or not
-// upload on cloudinary
-// create post object - entry in db
-// check for post creation
-// return response
+
 const createPost = asyncHandler(async (req, res) => {
+    // Creating Post 
+    // steps
+    // get the details from req.body and req.file
+    // validate the details
+    // check if image/video available or not
+    // upload on cloudinary
+    // create post object - entry in db
+    // check for post creation
+    // return response
     const { title, content, status } = req.body;
 
     // 1. Advanced Validation (Simplified example)
@@ -33,7 +34,7 @@ const createPost = asyncHandler(async (req, res) => {
     try {
         // 3. Upload
         cloudinaryResponse = await uploadOnCloudinary(localFilePath);
-        
+
         if (!cloudinaryResponse) {
             throw new ApiError(500, "Failed to upload to cloud");
         }
@@ -64,63 +65,63 @@ const createPost = asyncHandler(async (req, res) => {
     }
 });
 const updatePost = asyncHandler(async (req, res) => {
-  const postId = req.params.postId;
+    const postId = req.params.postId;
 
-  // 1. Auth guard
-  if (!req.user?._id) {
-    throw new ApiError(401, "Unauthorized access");
-  }
-
-  // 2. Find existing post
-  const post = await Post.findById(postId);
-
-  if (!post) {
-    throw new ApiError(404, "Post not found");
-  }
-
-  // 3. Ownership check
-  if (post.author.toString() !== req.user._id.toString()) {
-    throw new ApiError(403, "You are not allowed to update this post");
-  }
-
-  // 4. Validate input
-  const { title, content, status } = req.body || {};
-
-  if (!title?.trim() || !content?.trim()) {
-    throw new ApiError(400, "Title and content are required");
-  }
-
-  // 5. Optional image update
-  let newImage = null;
-
-  if (req.file?.path) {
-    const uploaded = await uploadOnCloudinary(req.file.path);
-
-    if (!uploaded?.secure_url || !uploaded?.public_id) {
-      throw new ApiError(500, "Failed to upload new image");
+    // 1. Auth guard
+    if (!req.user?._id) {
+        throw new ApiError(401, "Unauthorized access");
     }
 
-    newImage = {
-      url: uploaded.secure_url,
-      publicId: uploaded.public_id,
-    };
-  }
+    // 2. Find existing post
+    const post = await Post.findById(postId);
 
-  // 6. Update fields
-  post.title = title.trim();
-  post.content = content.trim();
-  post.status = status || post.status;
+    if (!post) {
+        throw new ApiError(404, "Post not found");
+    }
 
-  if (newImage) {
-    await deleteFromCloudinary(post.featuredImage.publicId);
-    post.featuredImage = newImage;
-  }
+    // 3. Ownership check
+    if (post.author.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not allowed to update this post");
+    }
 
-  await post.save();
+    // 4. Validate input
+    const { title, content, status } = req.body || {};
 
-  return res.status(200).json(
-    new ApiResponse(200, { post }, "Post updated successfully")
-  );
+    if (!title?.trim() || !content?.trim()) {
+        throw new ApiError(400, "Title and content are required");
+    }
+
+    // 5. Optional image update
+    let newImage = null;
+
+    if (req.file?.path) {
+        const uploaded = await uploadOnCloudinary(req.file.path);
+
+        if (!uploaded?.secure_url || !uploaded?.public_id) {
+            throw new ApiError(500, "Failed to upload new image");
+        }
+
+        newImage = {
+            url: uploaded.secure_url,
+            publicId: uploaded.public_id,
+        };
+    }
+
+    // 6. Update fields
+    post.title = title.trim();
+    post.content = content.trim();
+    post.status = status || post.status;
+
+    if (newImage) {
+        await deleteFromCloudinary(post.featuredImage.publicId);
+        post.featuredImage = newImage;
+    }
+
+    await post.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, { post }, "Post updated successfully")
+    );
 });
 
 const deletePost = asyncHandler(async (req, res) => {
@@ -132,22 +133,22 @@ const deletePost = asyncHandler(async (req, res) => {
     // delete from cloudinary
     // delete from db
     // return response
-    
+
     // 1. Auth guard
-    if(!req.user?.id){
-        throw new ApiError(401,"Unauthorized access");
+    if (!req.user?.id) {
+        throw new ApiError(401, "Unauthorized access");
     }
 
     // 2. Find existing post
     const post = await Post.findById(postId);
 
-    if(!post){
+    if (!post) {
         throw new ApiError(404, "Post not found");
     }
 
     // 3. Ownership check
-    if(post.author.toString() != req.user._id.toString()){
-        throw new ApiError(403,"You are not allowed to delete this post");
+    if (post.author.toString() != req.user._id.toString()) {
+        throw new ApiError(403, "You are not allowed to delete this post");
     }
     // 4. Delete from Cloudinary
     await deleteFromCloudinary(post.featuredImage.publicId);
@@ -162,8 +163,32 @@ const deletePost = asyncHandler(async (req, res) => {
 
 });
 
+const getPost = asyncHandler(async (req, res) => {
+    //steps
+    // get postId from req.params
+    // find post from db
+    // check if post exist or not
+    //  return response
+
+    const postId = req.params.postId;
+
+    if (!postId) {
+        throw new ApiError(400, "Post ID is required");
+    }
+
+    const post = await Post.findById(postId).populate("author", "fullName email");
+
+    if (!post) {
+        throw new ApiError(404, "Post not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { post }, "Post fetched successfully")
+    );
+});
 export {
     createPost,
     updatePost,
-    deletePost
+    deletePost,
+    getPost
 }
