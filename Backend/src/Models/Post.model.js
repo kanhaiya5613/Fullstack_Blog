@@ -1,4 +1,8 @@
 import mongoose, { Schema } from "mongoose";
+// steps
+// define post schema with fields: title, content, indexedDBmage, status, author
+// add timestamps to the schema
+// export the Post model
 const posrSchema = new Schema(
     {
         title: {

@@ -11,6 +11,11 @@ cloudinary.config({
 });
 
 const uploadOnCloudinary = async (localFilePath) => {
+    // steps
+    // check if file path is valid/available
+    // upload to cloudinary
+    // delete from local storage
+    // return the response from cloudinary
     try {
         if(!localFilePath) return null;
         console.log("Uploading to Cloudinary:",localFilePath);
@@ -33,6 +38,10 @@ const uploadOnCloudinary = async (localFilePath) => {
 };
 
 const deleteFromCloudinary = async (publicId) => {
+    // steps 
+    // check if publicId is valid
+    // delete from cloudinary
+    // return the response from cloudinary
     try{
         if(!publicId) return null;
 

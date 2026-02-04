@@ -1,7 +1,11 @@
 import mongoose,{Schema} from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-
+// steps
+// define user schema with fields: fullName, email, password, refreshToken
+// add pre-save hook to hash password
+// add methods to compare password, generate access token, and generate refresh token
+// export the User model
 const userSchema = new Schema({
     fullName: {
         type: String,
@@ -29,7 +33,6 @@ const userSchema = new Schema({
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next();
     this.password = await bcrypt.hash(this.password,10)
-    next()
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
