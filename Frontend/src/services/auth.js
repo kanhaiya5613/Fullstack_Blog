@@ -1,62 +1,68 @@
-import conf from '../conf/conf.js';
-import { Client, Account, ID } from "appwrite";
+import conf from "../conf/conf.js";
 
-export class AuthService {
-    client = new Client();
-    account;
+class AuthService {
 
-    constructor() {
-        this.client
-            .setEndpoint(conf.appwriteUrl)
-            .setProject(conf.appwriteProjectId);
-        this.account = new Account(this.client);
-    }
-
-    async createAccount({ email, password, name }) {
+    async request(url, options = {}) {
         try {
-            const userAccount = await this.account.create(ID.unique(), email, password, name);
-            if (userAccount) {
-                return this.login({ email, password });
-            }
-            return userAccount;
+            const controller = new AbortController();
+            setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+            const response = await fetch(url, {
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...options.headers
+                },
+                signal: controller.signal,
+                ...options,
+            }); 
+
+            const data = await response.json();
+
+            if (!response.ok) throw data;
+
+            return data;
+
         } catch (error) {
-            console.error("Appwrite service :: createAccount :: error", error);
+            if (error.name === "AbortError") {
+                throw { message: "Server timeout" };
+            }
             throw error;
         }
+    }
+
+    async createAccount({ fullName, email, password }) {
+        await this.request(`${conf.backendUrl}/api/v1/users/register`, {
+            method: "POST",
+            body: JSON.stringify({ fullName, email, password }),
+        });
+
+        return this.login({ email, password });
     }
 
     async login({ email, password }) {
-        try {
-            // Appwrite 14+ uses createEmailPasswordSession
-            return await this.account.createEmailPasswordSession(email, password);
-        } catch (error) {
-            console.error("Appwrite service :: login :: error", error);
-            throw error;
-        }
+        return this.request(`${conf.backendUrl}/api/v1/users/login`, {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+        });
     }
 
     async getCurrentUser() {
         try {
-            return await this.account.get();
-        } catch (error) {
-            // If it's a 401, it just means no one is logged in. 
-            // We return null so the frontend knows to show the login page.
-            if (error.code !== 401) {
-                console.log("Appwrite service :: getCurrentUser :: error ", error);
-            }
+            const data = await this.request(`${conf.backendUrl}/api/v1/users/me`);
+            return data.data;
+        } catch {
+            return null;
         }
-        return null;
     }
 
     async logout() {
-        try {
-            // Deletes the current session
-            await this.account.deleteSession('current');
-        } catch (error) {
-            console.log("Appwrite service :: logout :: error ", error);
-        }
+        await this.request(`${conf.backendUrl}/api/v1/users/logout`, {
+            method: "POST",
+        });
     }
 }
 
 const authService = new AuthService();
+
 export default authService;

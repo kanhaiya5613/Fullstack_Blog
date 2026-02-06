@@ -1,26 +1,27 @@
 import React from "react";
-import appwriteService from "../appwrite/config";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-function PostCard({ $id: id, title, featuredImage }) {
-  if (!id) return null;
-
+function PostCard({ _id, title, featuredImage }) {
   const mode = useSelector((state) => state.theme.mode);
   const isDark = mode === "dark";
+  if (!_id) {
+    return (
+      <div className="hidden" />
+    );
+  }
 
   return (
-    <Link to={`/post/${id}`} className="block h-full">
+    <Link to={`/post/${_id}`} className="block h-full">
       <div
-        className={`h-full rounded-xl p-4 transition hover:shadow-lg flex flex-col
-          ${isDark ? "bg-gray-800 text-gray-100" : "bg-gray-100 text-black"}
+        className={`h-full rounded-xl p-4 transition shadow-xl hover:shadow-2xl flex flex-col
+          ${isDark ? "bg-gray-700 border-gray-900 text-gray-100" : "bg-gray-300 text-black"}
         `}
       >
-        {/* Image */}
         <div className="w-full aspect-video mb-4 overflow-hidden rounded-xl">
           {featuredImage ? (
             <img
-              src={appwriteService.getFilePreview(featuredImage)}
+              src={featuredImage.url}
               alt={title || "Post image"}
               className="w-full h-full object-cover hover:scale-105 transition duration-300"
             />
@@ -31,7 +32,6 @@ function PostCard({ $id: id, title, featuredImage }) {
           )}
         </div>
 
-        {/* Title */}
         <h2 className="text-base sm:text-lg md:text-xl font-bold line-clamp-2">
           {title || "Untitled Post"}
         </h2>

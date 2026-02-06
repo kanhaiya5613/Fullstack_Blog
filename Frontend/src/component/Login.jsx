@@ -3,14 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { login as authLogin } from "../store/authSlice";
 import { Button, Input, Logo } from "./index";
 import { useDispatch, useSelector } from "react-redux";
-import authService from "../appwrite/auth";
+import authService from "../services/auth.js";
 import { useForm } from "react-hook-form";
 
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const mode = useSelector((state)=>state.theme.mode);
-  const isDark = mode ==="dark"
+  const mode = useSelector((state) => state.theme.mode);
+  const isDark = mode === "dark"
   const {
     register,
     handleSubmit,
@@ -33,11 +33,9 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      if (err.code === 401) {
-        setError("Invalid email or password");
-      } else {
-        setError(err.message);
-      }
+      setError(err?.message || "Something went wrong");
+
+
 
       setTimeout(() => setError(""), 3000);
     } finally {
@@ -59,7 +57,7 @@ function Login() {
         `}
       >
         <div className="mb-2 flex justify-center">
-          <span className="inline-block w-full max-w-[100px]">
+          <span className="inline-block w-full max-w-100px">
             <Logo width="100%" />
           </span>
         </div>
@@ -69,9 +67,8 @@ function Login() {
         </h2>
 
         <p
-          className={`mt-2 text-center text-base ${
-            isDark ? "text-gray-300" : "text-black/60"
-          }`}
+          className={`mt-2 text-center text-base ${isDark ? "text-gray-300" : "text-black/60"
+            }`}
         >
           Don&apos;t have any account?&nbsp;
           <Link

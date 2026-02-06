@@ -3,9 +3,10 @@ import { createPost,updatePost,deletePost, getPost, getPosts } from "../Controll
 import { verifyJWT } from "../Middlewares/auth.middleware.js";
 import {upload} from "../Middlewares/multer.middleware.js";
 const router = Router()
-router.post("/createPost", verifyJWT, upload.single("featuredImage"), createPost);
-router.put("/updatePost/:postId", verifyJWT, upload.single("featuredImage"), updatePost);
-router.delete("/deletePost/:postId", verifyJWT, deletePost);
-router.get("/getPost/:postId", getPost);
-router.get("/getPosts", getPosts);
+router.post("/", verifyJWT, upload.single("image"), createPost);
+router.put("/:postId", verifyJWT, upload.single("image"), updatePost);
+router.delete("/:postId", verifyJWT, deletePost);
+router.get("/:postId", getPost);
+router.get("/", getPosts);
+
 export default router;

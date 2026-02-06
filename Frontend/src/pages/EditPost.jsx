@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Container, PostForm } from "../component";
-import appwriteService from "../appwrite/config";
+import PostService from "../services/config";
 import { useNavigate, useParams } from "react-router-dom";
 
 function EditPost() {
   const [post, setPost] = useState(null);
-  const { id } = useParams();   // <-- ID, not slug
+  const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,17 +14,37 @@ function EditPost() {
       return;
     }
 
-    appwriteService
-      .getPost(id)
-      .then((post) => {
-        if (post) setPost(post);
-        else navigate("/");
-      })
-      .catch(() => navigate("/"));
+    const fetchPost = async () => {
+      try {
+        const response = await PostService.getPost(id);
 
+        const fetchedPost =
+          response?.data?.data ||
+          response?.data?.post ||
+          response?.data;
+
+        if (!fetchedPost) {
+          navigate("/");
+          return;
+        }
+
+        setPost(fetchedPost);
+      } catch (err) {
+        console.log("Edit fetch error:", err);
+        navigate("/");
+      }
+    };
+
+    fetchPost();
   }, [id, navigate]);
 
-  if (!post) return null;
+  if (!post) {
+    return (
+      <div className="py-20 text-center text-lg">
+        Loading post...
+      </div>
+    );
+  }
 
   return (
     <div className="py-8">

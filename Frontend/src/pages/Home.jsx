@@ -1,30 +1,46 @@
 import React, { useEffect, useState } from "react";
-import appwriteService from "../appwrite/config";
 import { Container, PostCard } from "../component";
-import { useSelector } from "react-redux";
+import PostService from "../services/config.js";
+
 function Home() {
   const [posts, setPosts] = useState([]);
-  const authStatus = useSelector((state) => state.auth.status);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    appwriteService.getPosts().then((posts) => {
-      if (posts) {
-        setPosts(posts);
+    const fetchPosts = async () => {
+      try {
+        const response = await PostService.getPosts();
+
+        // IMPORTANT FIX
+        const postList =
+          response?.data?.data ||
+          response?.data?.posts ||
+          response?.data ||
+          [];
+
+        setPosts(postList);
+      } catch (error) {
+        console.log("Failed to load posts:", error);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    fetchPosts();
   }, []);
 
-  if (posts.length === 0 || !authStatus) {
+  if (loading) {
     return (
-      <div className="w-full py-8 mt-4 text-center">
-        <Container>
-          <div className="flex flex-wrap">
-            <div className="p-2 flex-wrap">
-              <h1 className="text-2xl font-bold hover:text-gray-500">
-                Login to read posts
-              </h1>
-            </div>
-          </div>
-        </Container>
+      <div className="w-full py-20 text-center text-lg">
+        Loading posts...
+      </div>
+    );
+  }
+
+  if (!posts.length) {
+    return (
+      <div className="w-full py-20 text-center text-lg">
+        No posts available
       </div>
     );
   }
@@ -32,9 +48,12 @@ function Home() {
   return (
     <div className="w-full py-8">
       <Container>
-        <div className="flex flex-wrap">
+        <div className="flex flex-wrap p-2">
           {posts.map((post) => (
-            <div key={post.$id} className="p-2 w-full sm:1/2 md:1/3 lg:1/4">
+            <div
+              key={post._id}
+              className="p-2 w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
+            >
               <PostCard {...post} />
             </div>
           ))}

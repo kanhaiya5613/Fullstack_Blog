@@ -2,10 +2,11 @@ import React, { useId } from "react";
 import { useSelector } from "react-redux";
 
 const Input = React.forwardRef(function Input(
-  { label, type = "text", className = "", ...props },
+  { label, type = "text", className = "", isDark: _isDark, ...props },
   ref
 ) {
   const id = useId();
+
   const mode = useSelector((state) => state.theme.mode);
   const isDark = mode === "dark";
 
@@ -23,10 +24,10 @@ const Input = React.forwardRef(function Input(
       )}
 
       <input
-        type={type}
-        ref={ref}
-        id={id}
         {...props}
+        ref={ref}
+        type={type}
+        id={id}
         className={`px-3 py-2 rounded-lg outline-none duration-200 border w-full
         ${
           isDark

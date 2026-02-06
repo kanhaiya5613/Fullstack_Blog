@@ -11,7 +11,7 @@ export default function Header() {
 
   useEffect(() => {
     if (authStatus) {
-      navigate("/all-posts");
+      navigate("/");
     }
   }, [authStatus]);
 
@@ -19,7 +19,7 @@ export default function Header() {
     { name: "Home", slug: "/", active: true },
     { name: "Login", slug: "/login", active: !authStatus },
     { name: "Signup", slug: "/signup", active: !authStatus },
-    { name: "All Posts", slug: "/all-posts", active: authStatus },
+    { name: "My Posts", slug: "/my-posts", active: authStatus },
     { name: "Add Post", slug: "/add-post", active: authStatus },
   ];
 
@@ -28,12 +28,11 @@ export default function Header() {
       <Container>
         <nav className="flex items-center justify-between">
 
-          {/* Logo */}
+          
           <Link to="/">
             <Logo width="100px" />
           </Link>
 
-          {/* Desktop Menu */}
           <ul className="hidden md:flex items-center space-x-2">
             {navItems.map(
               (item) =>

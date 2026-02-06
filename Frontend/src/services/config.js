@@ -1,96 +1,63 @@
 import conf from "../conf/conf";
-import { Client, TablesDB, Storage, ID } from "appwrite";
-import { login } from "../store/authSlice";
-import { Query } from "appwrite";
-class Service {
-  client = new Client();
-  tablesDB;
-  storage;
 
-  constructor() {
-    this.client
-      .setEndpoint(conf.appwriteUrl)
-      .setProject(conf.appwriteProjectId);
+class PostService {
 
-    this.tablesDB = new TablesDB(this.client);
-    this.storage = new Storage(this.client);
+  async request(url, options = {}) {
+    try {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(), 10000);
+
+      const isFormData = options.body instanceof FormData;
+
+      const response = await fetch(url, {
+        credentials: "include",
+        headers: {
+          ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          ...options.headers,
+        },
+        signal: controller.signal,
+        ...options,
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw data;
+
+      return data;
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw { message: "Server timeout" };
+      }
+      throw error;
+    }
   }
 
-  async createPost(data) {
-    return await this.tablesDB.createRow(
-      conf.appwriteDatabaseId,
-      conf.appwriteCollectionId,
-      ID.unique(),
-      data
-    );
+  createPost(data) {
+    return this.request(`${conf.backendUrl}/api/v1/posts`, {
+      method: "POST",
+      body: data,
+    });
   }
 
-  async updatePost(id, data) {
-    return await this.tablesDB.updateRow(
-      conf.appwriteDatabaseId,
-      conf.appwriteCollectionId,
-      id,
-      data
-    );
+  updatePost(id, data) {
+    return this.request(`${conf.backendUrl}/api/v1/posts/${id}`, {
+      method: "PUT",
+      body: data,
+    });
   }
 
-  async deletePost(id) {
-    return await this.tablesDB.deleteRow(
-      conf.appwriteDatabaseId,
-      conf.appwriteCollectionId,
-      id
-    );
+  deletePost(id) {
+    return this.request(`${conf.backendUrl}/api/v1/posts/${id}`, {
+      method: "DELETE",
+    });
   }
 
-  async getPost(id) {
-    return await this.tablesDB.getRow(
-      conf.appwriteDatabaseId,
-      conf.appwriteCollectionId,
-      id
-    );
+  getPost(id) {
+    return this.request(`${conf.backendUrl}/api/v1/posts/${id}`);
   }
 
-async getPosts() {
-  try {
-    const res = await this.tablesDB.listRows(
-      conf.appwriteDatabaseId,
-      conf.appwriteCollectionId,
-      [
-        Query.equal("status", "active") 
-      ]
-    );
-  
-    return res.rows; 
-  } catch (error) {
-    console.log("Appwrite service :: getPosts :: error", error);
-    return false;
+  getPosts() {
+    return this.request(`${conf.backendUrl}/api/v1/posts`);
   }
 }
-  async uploadFile(file) {
-    return await this.storage.createFile(
-      conf.appwriteBucketId,
-      ID.unique(),
-      file,
-    );
-  }
 
-  async deleteFile(fileId) {
-    return await this.storage.deleteFile(conf.appwriteBucketId, fileId);
-  }
-  
-
-  getFilePreview(fileId) {
-  if (!fileId) return "";
-  //console.log(this.storage.getFileView(conf.appwriteBucketId,fileId));
-  
-  return this.storage.getFileView(
-    conf.appwriteBucketId,
-    fileId
-  );
-}
-
-
-}
-
-const service = new Service();
-export default service;
+export default new PostService();

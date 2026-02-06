@@ -50,7 +50,7 @@ const createPost = asyncHandler(async (req, res) => {
             status: status || "active",
             author: req.user._id
         });
-
+        //console.log(title,content)
         return res.status(201).json(
             new ApiResponse(201, post, "Post created successfully")
         );
@@ -120,7 +120,7 @@ const updatePost = asyncHandler(async (req, res) => {
     await post.save();
 
     return res.status(200).json(
-        new ApiResponse(200, { post }, "Post updated successfully")
+        new ApiResponse(200, post, "Post updated successfully")
     );
 });
 
@@ -183,7 +183,7 @@ const getPost = asyncHandler(async (req, res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200, { post }, "Post fetched successfully")
+        new ApiResponse(200, post, "Post fetched successfully")
     );
 });
 
@@ -193,7 +193,7 @@ const getPosts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
 
   return res.status(200).json(
-    new ApiResponse(200, { posts }, "Posts fetched successfully")
+    new ApiResponse(200, posts , "Posts fetched successfully")
   );
 });
 
