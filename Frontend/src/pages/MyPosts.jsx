@@ -61,7 +61,7 @@ function MyPosts() {
   // Loading
   if (loading) {
     return (
-      <div className="w-full py-8 mt-4 text-center">
+      <div className="w-full py-8 text-center">
         <Container>
           <h1 className="text-xl font-semibold">
             Loading your posts...
