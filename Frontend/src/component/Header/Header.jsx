@@ -100,7 +100,18 @@ export default function Header() {
           {/* Mobile Controls */}
           <div className="md:hidden flex items-center gap-3">
             <ThemeToggle />
+             {/* Mobile Profile */}
+            {authStatus && (
+              <li ref={dropdownRef}>
+                <Profile toggle={toggleLogout} />
 
+                {showLogout && (
+                  <div className="mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg border dark:border-gray-700 p-2">
+                    <LogoutBtn />
+                  </div>
+                )}
+              </li>
+            )}
             <button
               className="text-2xl"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -128,20 +139,10 @@ export default function Header() {
                 )
             )}
 
-            {/* Mobile Profile */}
-            {authStatus && (
-              <li ref={dropdownRef}>
-                <Profile toggle={toggleLogout} />
-
-                {showLogout && (
-                  <div className="mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg border dark:border-gray-700 p-2">
-                    <LogoutBtn />
-                  </div>
-                )}
-              </li>
-            )}
+           
 
           </ul>
+          
         )}
       </Container>
     </header>
