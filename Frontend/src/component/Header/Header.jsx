@@ -4,7 +4,7 @@ import { Container, Logo, LogoutBtn } from "../index.js";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "../ThemeToggle.jsx";
 import Profile from "../Profile.jsx";
-
+import Button from "../Button.jsx"
 export default function Header() {
   const authStatus = useSelector((state) => state.auth.status);
   const navigate = useNavigate();
@@ -97,12 +97,10 @@ export default function Header() {
             <ThemeToggle />
           </ul>
 
-          {/* Mobile Controls */}
           <div className="md:hidden flex items-center gap-3">
             <ThemeToggle />
-             {/* Mobile Profile */}
             {authStatus && (
-              <li ref={dropdownRef}>
+              <button ref={dropdownRef}>
                 <Profile toggle={toggleLogout} />
 
                 {showLogout && (
@@ -110,7 +108,7 @@ export default function Header() {
                     <LogoutBtn />
                   </div>
                 )}
-              </li>
+              </button>
             )}
             <button
               className="text-2xl"
