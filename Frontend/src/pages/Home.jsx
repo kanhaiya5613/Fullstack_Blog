@@ -30,7 +30,7 @@ function Home() {
           [];
 
         const userPosts = fetchedPosts
-        console.log(userPosts)
+        //console.log(userPosts)
         setPosts(userPosts);
       } catch (err) {
         console.log("Home Post fetch error:", err);
