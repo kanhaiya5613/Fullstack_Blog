@@ -4,7 +4,7 @@ import PostService from "../services/config";
 import { Button, Container } from "../component";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
-
+import Profile from "../component/Profile";
 export default function Post() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,6 @@ export default function Post() {
 
   const userData = useSelector((state) => state.auth.userData);
 
-  // FETCH POST
   useEffect(() => {
     if (!id) {
       navigate("/");
@@ -47,13 +46,11 @@ export default function Post() {
     fetchPost();
   }, [id, navigate]);
 
-  // AUTHOR CHECK
   const isAuthor =
     post && userData
       ? String(post.author?._id) === String(userData._id)
       : false;
 
-  // DELETE POST
   const deletePost = async () => {
     try {
       await PostService.deletePost(post._id, post.featuredImage?.public_id);
@@ -63,7 +60,6 @@ export default function Post() {
     }
   };
 
-  // LOADING
   if (loading) {
     return (
       <div className="py-20 text-center text-lg">
@@ -72,7 +68,6 @@ export default function Post() {
     );
   }
 
-  // NOT FOUND
   if (!post) {
     return (
       <div className="py-20 text-center text-lg">
@@ -85,7 +80,6 @@ export default function Post() {
     <div className="py-8">
       <Container>
 
-        {/* IMAGE */}
         <div className=" h-full w-fit mb-4 relative border rounded-xl p-2">
           {post.featuredImage?.url && (
             <img
@@ -96,7 +90,6 @@ export default function Post() {
             />
           )}
 
-          {/* AUTHOR CONTROLS */}
           {isAuthor && (
             <div className="absolute right-6 top-6 flex gap-3">
               <Link to={`/edit-post/${post._id}`}>
@@ -112,18 +105,24 @@ export default function Post() {
           )}
         </div>
 
-        {/* TITLE */}
         <div className="w-full mb-6">
           <h1 className="text-2xl font-bold">
             {post.title || "Untitled"}
           </h1>
         </div>
 
-        {/* CONTENT */}
+
         <div className="browser-css">
           {parse(post.content || "")}
         </div>
-
+        <div className="flex align-middle">
+          <div className="pt-3 ">
+            <Profile/>
+          </div>
+          <div className="pt-4 p-3 font-bold text-xl">
+            {post.author.fullName}
+          </div>
+        </div>
       </Container>
     </div>
   );

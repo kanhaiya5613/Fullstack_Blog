@@ -1,34 +1,61 @@
 import React, { useEffect, useState } from "react";
 import { Container, PostCard } from "../component";
 import PostService from "../services/config.js";
+import { useSelector } from "react-redux";
 
 function Home() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const authStatus = useSelector((state) => state.auth.status);
+  const userData = useSelector((state) => state.auth.userData);
+
   useEffect(() => {
+    // Wait until auth is ready
+    if (!authStatus || !userData?._id) {
+      setLoading(false);
+      return;
+    }
+
     const fetchPosts = async () => {
       try {
+        setLoading(true);
+
         const response = await PostService.getPosts();
 
-        // IMPORTANT FIX
-        const postList =
+        const fetchedPosts =
           response?.data?.data ||
           response?.data?.posts ||
           response?.data ||
           [];
 
-        setPosts(postList);
-      } catch (error) {
-        console.log("Failed to load posts:", error);
+        const userPosts = fetchedPosts
+        console.log(userPosts)
+        setPosts(userPosts);
+      } catch (err) {
+        console.log("Home Post fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPosts();
-  }, []);
+  }, [authStatus, userData?._id]);
 
+  // Not logged in
+  if (!authStatus) {
+    return (
+      <div className="w-full py-8 text-center">
+        <Container>
+          <h1 className="text-2xl font-bold">
+            Login to read your posts
+          </h1>
+        </Container>
+      </div>
+    );
+  }
+
+  // Loading
   if (loading) {
     return (
       <div className="w-full py-20 text-center text-lg">
@@ -37,6 +64,7 @@ function Home() {
     );
   }
 
+  // No posts
   if (!posts.length) {
     return (
       <div className="w-full py-20 text-center text-lg">

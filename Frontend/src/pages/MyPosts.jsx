@@ -1,19 +1,26 @@
-
-
 import React, { useEffect, useState } from "react";
 import PostService from "../services/config";
 import { Container, PostCard } from "../component";
 import { useSelector } from "react-redux";
 
-function myPosts() {
+function MyPosts() {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const authStatus = useSelector((state) => state.auth.status);
   const userData = useSelector((state) => state.auth.userData);
 
   useEffect(() => {
+    // Wait until auth is fully hydrated
+    if (!authStatus || !userData?._id) {
+      setLoading(false);
+      return;
+    }
+
     const fetchPosts = async () => {
       try {
+        setLoading(true);
+
         const response = await PostService.getPosts();
 
         const fetchedPosts =
@@ -22,22 +29,23 @@ function myPosts() {
           response?.data ||
           [];
 
-        
+        // Filter only current user's posts
         const userPosts = fetchedPosts.filter(
-          (post) => String(post.author?._id) === String(userData?._id)
+          (post) => String(post.author?._id) === String(userData._id)
         );
 
         setPosts(userPosts);
       } catch (err) {
         console.log("My Post fetch error:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (authStatus && userData?._id) {
-      fetchPosts();
-    }
-  }, [authStatus, userData]);
+    fetchPosts();
+  }, [authStatus, userData?._id]);
 
+  // Not logged in
   if (!authStatus) {
     return (
       <div className="w-full py-8 mt-4 text-center">
@@ -50,9 +58,23 @@ function myPosts() {
     );
   }
 
-  if (!posts.length) {
+  // Loading
+  if (loading) {
     return (
       <div className="w-full py-8 mt-4 text-center">
+        <Container>
+          <h1 className="text-xl font-semibold">
+            Loading your posts...
+          </h1>
+        </Container>
+      </div>
+    );
+  }
+
+  // No posts
+  if (!posts.length) {
+    return (
+      <div className="w-full py-8 text-center">
         <Container>
           <h1 className="text-2xl font-bold">
             You haven’t created any posts yet
@@ -62,6 +84,7 @@ function myPosts() {
     );
   }
 
+  // Render posts
   return (
     <div className="w-full py-8">
       <Container>
@@ -80,4 +103,4 @@ function myPosts() {
   );
 }
 
-export default myPosts;
+export default MyPosts;

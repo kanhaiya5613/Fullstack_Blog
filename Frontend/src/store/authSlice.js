@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+//const savedAuth = JSON.parse(localStorage.getItem("auth"));
 
 const initialState = {
   status: false,
@@ -16,6 +17,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.status = false;
       state.userData = null;
+      //localStorage.removeItem("auth");
     },
   },
 });

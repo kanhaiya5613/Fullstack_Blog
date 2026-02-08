@@ -4,9 +4,6 @@ class PostService {
 
   async request(url, options = {}) {
     try {
-      const controller = new AbortController();
-      setTimeout(() => controller.abort(), 10000);
-
       const isFormData = options.body instanceof FormData;
 
       const response = await fetch(url, {
@@ -15,18 +12,16 @@ class PostService {
           ...(isFormData ? {} : { "Content-Type": "application/json" }),
           ...options.headers,
         },
-        signal: controller.signal,
         ...options,
       });
+
       const data = await response.json();
 
       if (!response.ok) throw data;
 
       return data;
+
     } catch (error) {
-      if (error.name === "AbortError") {
-        throw { message: "Server timeout" };
-      }
       throw error;
     }
   }
